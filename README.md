@@ -77,7 +77,7 @@ pjt_6/
 
 ```bash
 git clone <repository-url>
-cd pjt_6
+cd NFC_Naver_Finance_Crawling
 ```
 
 ### 2. 가상환경 생성 및 활성화

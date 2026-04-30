@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>네이버증권 종목토론 제목 수집</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Arial, "Malgun Gothic", sans-serif;
+      color: #1f2937;
+      background: #f4f7f8;
+      --naver: #03c75a;
+      --naver-dark: #049f49;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --line: #dce3e8;
+      --soft-line: #edf1f4;
+      --surface: #ffffff;
+      --surface-soft: #f8fafb;
+      --warning: #fff8e5;
+      --warning-line: #f2cf63;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background:
+        linear-gradient(180deg, rgba(3, 199, 90, 0.08), rgba(244, 247, 248, 0) 240px),
+        #f4f7f8;
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      place-items: center;
+      border-radius: 7px;
+      color: #ffffff;
+      background: var(--naver);
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 25px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .status-pill {
+      padding: 7px 11px;
+      border: 1px solid rgba(3, 199, 90, 0.28);
+      border-radius: 999px;
+      color: #04763a;
+      background: rgba(3, 199, 90, 0.09);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .search-panel {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) 120px auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+      color: #374151;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    input {
+      width: 100%;
+      height: 44px;
+      padding: 0 13px;
+      border: 1px solid #cfd8df;
+      border-radius: 7px;
+      color: var(--ink);
+      background: #ffffff;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 120ms ease, box-shadow 120ms ease;
+    }
+
+    input:focus {
+      border-color: var(--naver);
+      box-shadow: 0 0 0 3px rgba(3, 199, 90, 0.16);
+    }
+
+    button {
+      height: 44px;
+      padding: 0 20px;
+      border: 0;
+      border-radius: 7px;
+      color: #ffffff;
+      background: var(--naver);
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: background 120ms ease, transform 120ms ease;
+    }
+
+    button:hover {
+      background: var(--naver-dark);
+      transform: translateY(-1px);
+    }
+
+    .message {
+      margin-top: 16px;
+      padding: 13px 14px;
+      border: 1px solid var(--warning-line);
+      border-radius: 8px;
+      color: #6f5200;
+      background: var(--warning);
+      font-weight: 700;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 10px;
+      margin: 18px 0 24px;
+    }
+
+    .metric {
+      min-height: 86px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+    }
+
+    .metric strong {
+      display: block;
+      margin-bottom: 9px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0;
+    }
+
+    .metric span {
+      display: block;
+      overflow-wrap: anywhere;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--soft-line);
+      background: var(--surface-soft);
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 17px;
+      letter-spacing: 0;
+    }
+
+    .count {
+      min-width: 28px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      color: #04763a;
+      background: rgba(3, 199, 90, 0.1);
+      text-align: center;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    ol {
+      margin: 0;
+      padding: 10px 16px 14px 38px;
+    }
+
+    li {
+      margin: 8px 0;
+      line-height: 1.48;
+    }
+
+    .wide {
+      margin-top: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 11px 13px;
+      border-bottom: 1px solid var(--soft-line);
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.45;
+    }
+
+    th {
+      color: #52606d;
+      background: var(--surface-soft);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .stage {
+      display: inline-block;
+      min-width: 58px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .stage-original {
+      color: #075985;
+      background: #e0f2fe;
+    }
+
+    .stage-cleaned {
+      color: #04763a;
+      background: rgba(3, 199, 90, 0.12);
+    }
+
+    .stage-augmented {
+      color: #7c2d12;
+      background: #ffedd5;
+    }
+
+    pre {
+      overflow-x: auto;
+      margin: 0;
+      padding: 14px 16px;
+      color: #d9f99d;
+      background: #0f172a;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      background: rgba(244, 247, 248, 0.84);
+      backdrop-filter: blur(8px);
+    }
+
+    .loading-overlay.is-active {
+      display: grid;
+    }
+
+    .loading-card {
+      width: min(520px, 100%);
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
+    }
+
+    .loading-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      font-weight: 900;
+    }
+
+    .loading-percent {
+      color: var(--naver-dark);
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .progress-track {
+      height: 12px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e5ecef;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--naver), #0fd977);
+      transition: width 220ms ease;
+    }
+
+    .loading-detail {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .loading-steps {
+      display: grid;
+      gap: 8px;
+      margin-top: 18px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .loading-steps li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      color: #4b5563;
+      font-size: 13px;
+    }
+
+    .loading-steps li::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #cbd5dc;
+    }
+
+    .loading-steps li.is-current::before,
+    .loading-steps li.is-done::before {
+      background: var(--naver);
+    }
+
+    @media (max-width: 860px) {
+      main {
+        width: min(100% - 20px, 1180px);
+        padding-top: 18px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      form,
+      .result-grid {
+        grid-template-columns: 1fr;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="loading-overlay" id="loadingOverlay" aria-live="polite" aria-hidden="true">
+    <div class="loading-card">
+      <div class="loading-title">
+        <span>데이터 수집 및 전처리 중</span>
+        <span class="loading-percent" id="loadingPercent">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <p class="loading-detail" id="loadingDetail">
+        네이버증권에서 회사를 검색하고 종목토론 제목을 수집하고 있습니다.
+      </p>
+      <ul class="loading-steps">
+        <li data-step="0" class="is-current">회사 검색 및 종목 선택</li>
+        <li data-step="1">종목토론 제목 20개 수집</li>
+        <li data-step="2">전처리 및 LLM 필터링</li>
+        <li data-step="3">텍스트 증강 및 통합 결과 저장</li>
+      </ul>
+    </div>
+  </div>
+
+  <main>
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">N</div>
+        <h1>네이버증권 종목토론 제목 수집</h1>
+      </div>
+      <div class="status-pill">F102 Pipeline</div>
+    </div>
+
+    <div class="search-panel">
+      <form method="get" action="" id="crawlerForm">
+        <label>
+          회사명
+          <input name="company" value="{{ company|default:'' }}" placeholder="예: 삼성" autocomplete="off" required>
+        </label>
+        <label>
+          수집 개수
+          <input name="limit" type="number" min="1" max="100" value="{{ default_limit|default:20 }}">
+        </label>
+        <button type="submit">수집</button>
+      </form>
+    </div>
+
+    {% if error %}
+      <div class="message">{{ error }}</div>
+    {% endif %}
+
+    {% if result %}
+      <div class="summary">
+        <div class="metric">
+          <strong>요구사항 번호</strong>
+          <span>{{ result.requirement_number }}</span>
+        </div>
+        <div class="metric">
+          <strong>입력 회사명</strong>
+          <span>{{ result.company }}</span>
+        </div>
+        <div class="metric">
+          <strong>실제 종목명</strong>
+          <span>{{ result.actual_stock_name }}</span>
+        </div>
+        <div class="metric">
+          <strong>종목 코드</strong>
+          <span>{{ result.stock_code }}</span>
+        </div>
+        <div class="metric">
+          <strong>원본 수집 개수</strong>
+          <span>{{ result.count }}</span>
+        </div>
+        <div class="metric">
+          <strong>생성 일시</strong>
+          <span>{{ result.created_at }}</span>
+        </div>
+      </div>
+
+      <div class="result-grid">
+        <section class="panel">
+          <div class="panel-header">
+            <h2>원본 제목 목록</h2>
+            <span class="count">{{ result.original_comments|length }}</span>
+          </div>
+          <ol>
+            {% for title in result.original_comments %}
+              <li>{{ title }}</li>
+            {% empty %}
+              <li>수집된 제목이 없습니다.</li>
+            {% endfor %}
+          </ol>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>전처리 후 데이터</h2>
+            <span class="count">{{ result.cleaned_comments|length }}</span>
+          </div>
+          <ol>
+            {% for title in result.cleaned_comments %}
+              <li>{{ title }}</li>
+            {% empty %}
+              <li>전처리 후 남은 제목이 없습니다.</li>
+            {% endfor %}
+          </ol>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>증강된 데이터</h2>
+            <span class="count">{{ result.augmented_comments|length }}</span>
+          </div>
+          <ol>
+            {% for title in result.augmented_comments %}
+              <li>{{ title }}</li>
+            {% empty %}
+              <li>생성된 증강 제목이 없습니다.</li>
+            {% endfor %}
+          </ol>
+        </section>
+      </div>
+
+      <section class="panel wide">
+        <div class="panel-header">
+          <h2>통합 데이터 결과</h2>
+          <span class="count">{{ result.integrated_data|length }}</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>단계</th>
+              <th>번호</th>
+              <th>텍스트</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in result.integrated_data %}
+              <tr>
+                <td>
+                  {% if item.stage == "original" %}
+                    <span class="stage stage-original">{{ item.stage_label }}</span>
+                  {% elif item.stage == "cleaned" %}
+                    <span class="stage stage-cleaned">{{ item.stage_label }}</span>
+                  {% else %}
+                    <span class="stage stage-augmented">{{ item.stage_label }}</span>
+                  {% endif %}
+                </td>
+                <td>{{ item.source_index }}</td>
+                <td>{{ item.text }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="3">통합된 데이터가 없습니다.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+
+      <section class="panel wide">
+        <div class="panel-header">
+          <h2>IQR 및 LLM 필터 정보</h2>
+        </div>
+        <pre>{{ result.iqr_thresholds }}</pre>
+      </section>
+    {% endif %}
+  </main>
+
+  <script>
+    const form = document.getElementById("crawlerForm");
+    const overlay = document.getElementById("loadingOverlay");
+    const percentText = document.getElementById("loadingPercent");
+    const progressFill = document.getElementById("progressFill");
+    const loadingDetail = document.getElementById("loadingDetail");
+    const steps = Array.from(document.querySelectorAll(".loading-steps li"));
+
+    const messages = [
+      "네이버증권에서 회사를 검색하고 최상단 종목을 선택하고 있습니다.",
+      "종목토론 게시판으로 이동해 제목 데이터를 수집하고 있습니다.",
+      "댓글 수 표기와 불필요한 패턴을 제거하고 LLM 필터를 적용하고 있습니다.",
+      "증강 데이터를 생성하고 원본, 전처리, 증강 결과를 통합하고 있습니다.",
+      "거의 완료되었습니다. 결과 화면을 준비하고 있습니다."
+    ];
+
+    function updateProgress(progress) {
+      const value = Math.max(0, Math.min(100, Math.round(progress)));
+      percentText.textContent = `${value}%`;
+      progressFill.style.width = `${value}%`;
+
+      const stepIndex = value < 25 ? 0 : value < 55 ? 1 : value < 82 ? 2 : 3;
+      loadingDetail.textContent = messages[value >= 100 ? 4 : stepIndex];
+
+      steps.forEach((step, index) => {
+        step.classList.toggle("is-done", index < stepIndex);
+        step.classList.toggle("is-current", index === stepIndex && value < 100);
+      });
+    }
+
+    function startProgress() {
+      const startedAt = Date.now();
+      const expectedMs = 52000;
+      overlay.classList.add("is-active");
+      overlay.setAttribute("aria-hidden", "false");
+      updateProgress(0);
+
+      window.setInterval(() => {
+        const elapsed = Date.now() - startedAt;
+        let progress = (elapsed / expectedMs) * 100;
+        if (progress > 96 && elapsed < expectedMs * 1.4) {
+          progress = 96 + ((elapsed - expectedMs) / (expectedMs * 0.4)) * 4;
+        }
+        updateProgress(progress);
+      }, 280);
+    }
+
+    form.addEventListener("submit", (event) => {
+      const companyInput = form.querySelector("input[name='company']");
+      if (!companyInput.value.trim()) {
+        return;
+      }
+
+      const submitButton = form.querySelector("button[type='submit']");
+      submitButton.disabled = true;
+      submitButton.textContent = "수집 중";
+      startProgress();
+    });
+  </script>
+</body>
+</html>

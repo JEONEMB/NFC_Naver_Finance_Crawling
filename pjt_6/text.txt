@@ -1,0 +1,5 @@
+1. 가상환경 만들기
+2. requirements 설치
+3. .env 직접 만들기
+4. migrate 실행
+5. runserver 실행
